@@ -32,14 +32,14 @@ class Mask {
   bool mirrorY;
 
   Mask();
-  
-  Mask(
-    const std::vector<int>& data,
-    const int width,
-    const int height,
-    const bool mirrorX,
-    const bool mirrorY
-  );
+
+  Mask(const std::vector<int>& data,
+       const int width,
+       const int height,
+       const bool mirrorX,
+       const bool mirrorY);
+
+  Mask(const Mask& mask);
 };
 
 #endif

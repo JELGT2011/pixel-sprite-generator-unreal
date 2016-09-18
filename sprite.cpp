@@ -3,37 +3,24 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "Sprite.h"
-#include "Mask.h"
+#include "sprite.h"
+#include "mask.h"
 
-Sprite::Sprite()
- : Sprite(
-    0,
-    0,
-    Mask(),
-    true,
-    0.3,
-    0.2,
-    0.3,
-    0.5,
-    0
-  ) {};
+Sprite::Sprite() : Sprite(6, 12, Mask(), true, 0.3, 0.2, 0.3, 0.5, 0) {}
 
-Sprite::Sprite(
-  const int width,
-  const int height,
-  const Mask& Mask,
-  const bool colored,
-  const double edgeBrightness,
-  const double colorVariations,
-  const double brightnessNoise,
-  const double saturation,
-  const int seed
-) {
+Sprite::Sprite(const int width,
+               const int height,
+               const Mask& mask,
+               const bool colored,
+               const double edgeBrightness,
+               const double colorVariations,
+               const double brightnessNoise,
+               const double saturation,
+               const int seed) {
   this->mask = mask;
   this->width = mask.width * (mask.mirrorX ? 2 : 1);
   this->height = mask.height * (mask.mirrorY ? 2 : 1);
-  this->data = std::vector<int>{};
+  this->data = std::vector<int>(this->width * this->height);
   this->colored = colored;
   this->edgeBrightness = edgeBrightness;
   this->colorVariations = colorVariations;
@@ -51,14 +38,6 @@ Sprite::Sprite(
     this->MirrorY();
   }
   this->GenerateEdges();
-};
-
-int Sprite::GetData(const int x, const int y) {
-  return this->data[y * this->width + x];
-}
-
-void Sprite::SetData(const int x, const int y, const int value) {
-  this->data[y * this->width + x] = value;
 }
 
 void Sprite::InitData() {
@@ -97,7 +76,7 @@ void Sprite::ApplyMask() {
   int maskHeight = this->mask.height;
   int maskWidth = this->mask.width;
   for (int y = 0; y < maskHeight; y++) {
-    for (int x = 0; maskWidth; x++) {
+    for (int x = 0; x < maskWidth; x++) {
       this->SetData(x, y, this->mask.data[y * maskWidth + x]);
     }
   }
@@ -129,11 +108,9 @@ void Sprite::GenerateEdges() {
   }
 }
 
-std::vector<double> Sprite::HSLToRGB(
-  const double h,
-  const double s,
-  const double l
-) {
+std::vector<double> Sprite::HSLToRGB(const double h,
+                                     const double s,
+                                     const double l) {
   double f, p, q, t;
   int i = (int)floor(h * 6.0);
 
@@ -143,13 +120,13 @@ std::vector<double> Sprite::HSLToRGB(
   t = l * (1 - (1 - f) * s);
 
   switch (i % 6) {
-    case 0: return std::vector<double>{ l, t, p };
-    case 1: return std::vector<double>{ q, l, p };
-    case 2: return std::vector<double>{ p, l, t };
-    case 3: return std::vector<double>{ p, q, l };
-    case 4: return std::vector<double>{ t, p, l };
-    case 5: return std::vector<double>{ l, p, q };
-    default: return std::vector<double>{};
+    case 0: return { l, t, p };
+    case 1: return { q, l, p };
+    case 2: return { p, l, t };
+    case 3: return { p, q, l };
+    case 4: return { t, p, l };
+    case 5: return { l, p, q };
+    default: return {};
   };
 }
 
@@ -162,14 +139,10 @@ std::string Sprite::ToString() {
   int width = this->width;
   int val;
   std::string s = "";
-    for (auto datum : this-> data) {
-        std::cout << std::to_string(datum) << " ";
-    }
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       val = this->GetData(x, y);
-      //s += val >= 0 ? " " + std::to_string(val) : "" + std::to_string(val);
-        std::cout << std::to_string(val) << " ";
+      s += val >= 0 ? "  " + std::to_string(val) : " " + std::to_string(val);
     }
     s += "\n";
   }

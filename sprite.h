@@ -3,7 +3,7 @@
 #define SPRITE_H_
 
 #include <vector>
-#include "Mask.h"
+#include "mask.h"
 
 /**
  * The Sprite class makes use of a Mask instance to generate a 2D sprite on a
@@ -37,17 +37,15 @@ class Sprite {
 
   Sprite();
 
-  Sprite(
-    const int width,
-    const int height,
-    const Mask& Mask,
-    const bool colored,
-    const double edgeBrightness,
-    const double colorVariations,
-    const double brightnessNoise,
-    const double saturation,
-    const int seed
-  );
+  Sprite(const int width,
+         const int height,
+         const Mask& mask,
+         const bool colored,
+         const double edgeBrightness,
+         const double colorVariations,
+         const double brightnessNoise,
+         const double saturation,
+         const int seed);
 
   /**
    * The initData method initializes the sprite data to completely solid.
@@ -148,11 +146,9 @@ class Sprite {
    * @method HSLToRGB
    * @returns {result}
    */
-  std::vector<double> HSLToRGB(
-    const double h,
-    const double s,
-    const double l
-  );
+  std::vector<double> HSLToRGB(const double h,
+                               const double s,
+                               const double l);
 
   /**
    * This method renders out the template data to a HTML canvas to finally
@@ -167,5 +163,15 @@ class Sprite {
 
    std::string ToString();
 };
+
+inline
+int Sprite::GetData(const int x, const int y) {
+  return this->data[y * this->width + x];
+}
+
+inline
+void Sprite::SetData(const int x, const int y, const int value) {
+  this->data[y * this->width + x] = value;
+}
 
 #endif
