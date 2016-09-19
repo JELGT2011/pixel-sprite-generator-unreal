@@ -2,6 +2,8 @@
 #ifndef SPRITE_H_
 #define SPRITE_H_
 
+#include <math.h>
+#include <stdlib.h>
 #include <vector>
 #include "mask.h"
 

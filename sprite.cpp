@@ -1,10 +1,19 @@
 
 #include <math.h>
+#include <stdlib.h>
 #include <iostream>
 #include <string>
 #include <vector>
 #include "sprite.h"
 #include "mask.h"
+
+double SeededDouble() {
+  return rand() % 100 / 100.0;
+}
+
+bool SeededBool() {
+  return rand() % 2 == 0;
+}
 
 Sprite::Sprite() : Sprite(6, 12, Mask(), true, 0.3, 0.2, 0.3, 0.5, 0) {}
 
@@ -82,7 +91,29 @@ void Sprite::ApplyMask() {
   }
 }
 
-void Sprite::GenerateRandomSample() {}
+void Sprite::GenerateRandomSample() {
+  std::srand(this->seed);
+  int height = this->height;
+  int width = this->width;
+  int val;
+  for (int y = 0; y < height; y++) {
+    for (int x = 0; x < width; x++) {
+      val = this->GetData(x, y);
+      switch (val) {
+      case 1:
+        val = SeededBool();
+        break;
+      case 2:
+        val = SeededBool() ? 1 : -1;
+        break;
+      default:
+        val = 0;
+        break;
+      }
+      this->SetData(x, y, val);
+    }
+  }
+}
 
 void Sprite::GenerateEdges() {
   int height = this->height;
@@ -131,7 +162,68 @@ std::vector<double> Sprite::HSLToRGB(const double h,
 }
 
 std::vector<int> Sprite::RenderPixelData() {
-  return std::vector<int>{};
+  bool isVerticalGradient = SeededBool();
+  double saturation = fmax(fmin(SeededDouble() * this->saturation, 1.0), 0.0);
+  double hue = SeededDouble();
+  std::vector<int> pixels = std::vector<int>(this->height * this->width * 4);
+  int ulen, vlen;
+
+  if (isVerticalGradient) {
+    ulen = this->height;
+    vlen = this->width;
+  } else {
+    ulen = this->width;
+    vlen = this->height;
+  }
+
+  for (int u = 0; u < ulen; u++) {
+    double isNewColor = fabs(((SeededDouble() * 2 - 1) +
+                              (SeededDouble() * 2 - 1) +
+                              (SeededDouble() * 2 - 1) / 3.0));
+    if (isNewColor > (1.0 - this->colorVariations)) {
+      hue = SeededDouble();
+    }
+
+    for (int v = 0; v < vlen; v++) {
+      int val, index;
+      if (isVerticalGradient) {
+        val = this->GetData(v, u);
+        index = (u * vlen + v) * 4;
+      } else {
+        val = this->GetData(u, v);
+        index = (v * ulen + u) * 4;
+      }
+      std::vector<double> rgb = { 1, 1, 1 };
+
+      if (val != 0) {
+        if (this->colored) {
+          double brightness = sin(((double)u / (double)ulen) * M_PI)
+                            * (1 - this->brightnessNoise) + SeededDouble()
+                            * this->brightnessNoise;
+          rgb = this->HSLToRGB(hue, saturation, brightness);
+          if (val == -1) {
+            rgb[0] *= this->edgeBrightness;
+            rgb[1] *= this->edgeBrightness;
+            rgb[2] *= this->edgeBrightness;
+          }
+        } else {
+          if (val == -1) {
+            rgb = { 0, 0, 0 };
+          }
+        }
+      }
+      pixels[index + 0] = (int)(rgb[0] * 255);
+      pixels[index + 1] = (int)(rgb[1] * 255);
+      pixels[index + 2] = (int)(rgb[2] * 255);
+      if (val != 0) {
+        pixels[index + 3] = 255;
+      } else {
+        pixels[index + 3] = 0;
+      }
+    }
+  }
+
+  return pixels;
 }
 
 std::string Sprite::ToString() {
@@ -139,9 +231,10 @@ std::string Sprite::ToString() {
   int width = this->width;
   int val;
   std::string s = "";
+  std::vector<int> pixels = this->RenderPixelData();
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
-      val = this->GetData(x, y);
+      val = pixels[y * this->width + x];
       s += val >= 0 ? "  " + std::to_string(val) : " " + std::to_string(val);
     }
     s += "\n";
