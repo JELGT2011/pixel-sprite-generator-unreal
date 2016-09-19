@@ -7,7 +7,7 @@
 int main(int argc, const char* argv[]) {
 
   // const int SPRITE_SCALE = 2;
-  const int SPRITE_COUNT = 100;
+  const int SPRITE_COUNT = 50;
 
   std::vector<int> data = {
       0, 0, 0, 0, 0, 0,

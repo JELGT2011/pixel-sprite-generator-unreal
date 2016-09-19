@@ -235,7 +235,7 @@ std::string Sprite::ToString() {
   for (int y = 0; y < height; y++) {
     for (int x = 0; x < width; x++) {
       val = pixels[y * this->width + x];
-      s += val >= 0 ? "  " + std::to_string(val) : " " + std::to_string(val);
+      s += val >= 0 ? " " + std::to_string(val) : "" + std::to_string(val);
     }
     s += "\n";
   }
